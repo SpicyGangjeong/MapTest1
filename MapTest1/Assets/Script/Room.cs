@@ -9,19 +9,21 @@ public class Room : MonoBehaviour
     public GameObject[] BeforeRoom;
     public GameObject[] AfterRoom;
     [SerializeField]
-    public LineRenderer lineRendererPrefab;
-    public Transform[] linePoints;
+    public GameObject linePrefab;
+    public RectTransform[] linePoints;
     public bool isAvailable = false;
+    RectTransform rectTransform;
 
     private void Start()
     {
-
+        
     }
     public void setMaximumRoom(int maxRoom)
     {
         BeforeRoom = new GameObject[maxRoom];
         AfterRoom = new GameObject[maxRoom];
-        linePoints = new Transform[maxRoom];
+        linePoints = new RectTransform[maxRoom]; 
+        rectTransform = gameObject.GetComponent<RectTransform>();
     }
 
     public void setNextRoom(GameObject objRoom)
@@ -40,7 +42,8 @@ public class Room : MonoBehaviour
         {
             if (linePoints[i] == null)
             {
-                linePoints[i] = objRoom.transform;
+                linePoints[i] = objRoom.GetComponent<RectTransform>();
+                Debug.Log("Now Room / RectPos = " + gameObject.name + rectTransform.position + "\nobjRoom = " + objRoom.name + objRoom.GetComponent<RectTransform>().position);
                 break;
             }
         }
@@ -59,22 +62,35 @@ public class Room : MonoBehaviour
 
     public void startDraw()
     {
-        // 각각에 라인 렌더러를 생성하여 라인을 그립니다.
+        // 각각에 라인 이미지를 생성하여 라인을 그립니다.
         for (int i = 0; i < linePoints.Length; i++)
         {
-            DrawLine(gameObject.transform.position, linePoints[i].position);
+            if (linePoints[i] == null)
+            {
+                break;
+            }
+            DrawLine(rectTransform.position, linePoints[i].position);
         }
     }
     // 두 점 사이에 라인을 그리는 함수
     void DrawLine(Vector3 startPos, Vector3 endPos)
     {
-        // 라인 렌더러 생성
-        LineRenderer lineRenderer = Instantiate(lineRendererPrefab, gameObject.transform);
+        // 시작점과 끝점 간의 거리를 계산합니다.
+        Vector3 direction = endPos - startPos;
+        float distance = direction.magnitude;
 
-        // 라인 렌더러 속성 설정
-        lineRenderer.positionCount = 3;
-        lineRenderer.SetPosition(0, startPos);
-        lineRenderer.SetPosition(1, endPos);
-        lineRenderer.useWorldSpace = false; // 월드 공간에서 사용할 것인지 여부 설정
+        // 선의 각도를 계산합니다.
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        GameObject line = Instantiate(linePrefab, gameObject.transform) as GameObject;
+        RectTransform lineRectTransForm = line.GetComponent<RectTransform>();
+
+
+
+        // 선의 위치 및 회전을 설정합니다.
+        lineRectTransForm.sizeDelta = new Vector2(distance, lineRectTransForm.sizeDelta.y);
+        lineRectTransForm.anchoredPosition = startPos + direction * 0.5f;
+        lineRectTransForm.rotation = Quaternion.Euler(0, 0, angle);
+
     }
 }

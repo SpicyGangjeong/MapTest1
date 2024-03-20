@@ -92,6 +92,6 @@ MonoBehaviour:
   _roomType: 2
   BeforeRoom: []
   AfterRoom: []
-  lineRendererPrefab: {fileID: 6307025391762959160, guid: b97eae299881e4449a71f8d6ab41152d, type: 3}
+  linePrefab: {fileID: 2336019937006722970, guid: 361ad5ed9b1564f44b215f2925edfa07, type: 3}
   linePoints: []
   isAvailable: 0
