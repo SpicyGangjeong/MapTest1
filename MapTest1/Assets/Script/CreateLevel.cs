@@ -13,6 +13,7 @@ public class CreateLevel : MonoBehaviour
     public int _maxLevel;
     [SerializeField]
     public int _maxDepth;
+
     void Start()
     {
         buildLevel();
@@ -24,13 +25,13 @@ public class CreateLevel : MonoBehaviour
         System.Random random = new System.Random(DateTime.Now.Millisecond);
         GameObject nowLevel;
         int count_room = 0;
-        for(int level = 0; level < _maxLevel ; level++)
+        for (int level = 0; level < _maxLevel; level++)
         {
             nowLevel = Instantiate(_levelPanel, gameObject.transform) as GameObject;
             nowLevel.name = "LevelPanel" + level;
 
             int depth = 0;
-            while(depth < _maxDepth)
+            while (depth < _maxDepth)
             {
                 GameObject room = Instantiate(_room, nowLevel.transform) as GameObject;
                 room.name = "Room_" + count_room + "_" + level + depth;
@@ -66,8 +67,25 @@ public class CreateLevel : MonoBehaviour
             for (int i = 0; i < currentLevel.transform.childCount; i++)
             {
                 GameObject currentRoom = currentLevel.transform.GetChild(i).gameObject;
-
+                currentRoom.GetComponent<Room>().setMaximumRoom(_maxDepth);
+                GameObject[] nextRooms = getRandomChild(nextLevel);
+                for ( int j =0; j < nextRooms.Length; j++)
+                {
+                    currentRoom.GetComponent<Room>().setNextRoom(nextRooms[j]);
+                }
+                currentRoom.GetComponent<Room>().startDraw();
             }
         }
+    }
+    GameObject[] getRandomChild(GameObject nextLevel)
+    {
+        GameObject[] objectiveRooms;
+        int maxchild = nextLevel.transform.childCount;
+        objectiveRooms = new GameObject[maxchild];
+        for (int i = 0; i < maxchild; i++)
+        {
+            objectiveRooms[i] = nextLevel.transform.GetChild(i).gameObject;
+        }
+        return objectiveRooms;
     }
 }
