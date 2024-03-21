@@ -17,7 +17,7 @@ public class CreateLevel : MonoBehaviour
     void Start()
     {
         buildLevel();
-        buildBridge();
+        StartCoroutine(buildForGrid());
     }
 
     void buildLevel()
@@ -87,5 +87,11 @@ public class CreateLevel : MonoBehaviour
             objectiveRooms[i] = nextLevel.transform.GetChild(i).gameObject;
         }
         return objectiveRooms;
+    }
+
+    IEnumerator buildForGrid()
+    {
+        yield return null;
+        buildBridge();
     }
 }

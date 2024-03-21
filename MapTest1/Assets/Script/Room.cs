@@ -43,7 +43,8 @@ public class Room : MonoBehaviour
             if (linePoints[i] == null)
             {
                 linePoints[i] = objRoom.GetComponent<RectTransform>();
-                Debug.Log("Now Room / RectPos = " + gameObject.name + rectTransform.position + "\nobjRoom = " + objRoom.name + objRoom.GetComponent<RectTransform>().position);
+                /*Debug.Log("Now Room / RectPos = " + gameObject.name + "\'s World Position " + transform.name + transform.parent.name + transform.parent.GetComponent<RectTransform>().position + transform.GetComponent<RectTransform>().position + transform.GetComponent<RectTransform>().localPosition
+                    + "\nobjRoom = " + objRoom.name + "\'s WorldPosition " + objRoom.transform.parent.TransformPoint(objRoom.GetComponent<RectTransform>().localPosition));*/
                 break;
             }
         }
