@@ -6,24 +6,29 @@ public class Room : MonoBehaviour
 {
     [SerializeField]
     public Types.RoomType _roomType = Types.RoomType.Battle;
-    public GameObject[] BeforeRoom;
-    public GameObject[] AfterRoom;
+    public GameObject[] BeforeRoom; 
+    public GameObject[] AfterRoom; 
     [SerializeField]
     public GameObject linePrefab;
     public Transform[] linePoints;
     public bool isAvailable = false;
-    RectTransform rectTransform;
+    int _maximumRoom;
+    int _currentRoomNumber;
+    int _currentLevel;
 
     private void Start()
     {
         
     }
-    public void setMaximumRoom(int maxRoom)
+    public void setEnvironment(int currentRoomNumber, int currentLevel, int maxRoom)
     {
+        _currentRoomNumber = currentRoomNumber;
+        _currentLevel = currentLevel;
+        _maximumRoom = maxRoom;
+        
         BeforeRoom = new GameObject[maxRoom];
         AfterRoom = new GameObject[maxRoom];
         linePoints = new Transform[maxRoom]; 
-        rectTransform = gameObject.GetComponent<RectTransform>();
     }
 
     public void setNextRoom(GameObject objRoom)
@@ -33,7 +38,7 @@ public class Room : MonoBehaviour
             if (AfterRoom[i] == null)
             {
                 AfterRoom[i] = objRoom;
-                setBeforeRoom(gameObject);
+                setBeforeRoom(objRoom);
                 break;
             }
         }
@@ -51,11 +56,16 @@ public class Room : MonoBehaviour
     }
     void setBeforeRoom(GameObject objRoom)
     {
-        for (int i = 0; i < BeforeRoom.Length; i++)
+        GameObject[] objBeforeRoom = objRoom.GetComponent<Room>().BeforeRoom;
+        if (objBeforeRoom.Length < _maximumRoom)
         {
-            if (BeforeRoom[i] == null)
+            objBeforeRoom = new GameObject[_maximumRoom];
+        }
+        for (int i = 0; i < objBeforeRoom.Length; i++)
+        {
+            if (objBeforeRoom[i] == null)
             {
-                BeforeRoom[i] = objRoom;
+                objBeforeRoom[i] = gameObject;
                 break;
             }
         }

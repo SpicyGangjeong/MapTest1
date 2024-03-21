@@ -117,4 +117,4 @@ MonoBehaviour:
   _levelPanel: {fileID: 1819096251285507815, guid: 45220b9c07977aa46838593a21ee5dff, type: 3}
   _room: {fileID: 2175521593989252900, guid: 68b8e8b002d0c5544a6bcb310126e26a, type: 3}
   _maxLevel: 12
-  _maxDepth: 5
+  _maxRoom: 5
