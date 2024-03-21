@@ -13,11 +13,18 @@ public class forDrawExample : MonoBehaviour
     GameObject linePrefab;
     private void Start()
     {
+        StartCoroutine(afterOneFrame());
+    }
+    IEnumerator afterOneFrame()
+    {
+        yield return null;
+
         GameObject line = Instantiate(linePrefab, gameObject.transform) as GameObject;
 
         Vector3 startPos = StartUI.position;
         Vector3 endPos = EndUI.position;
-
+        Debug.Log("StartUI : " + StartUI.position);
+        Debug.Log("EndUI : " + EndUI.position);
         // 시작점과 끝점 간의 거리를 계산합니다.
         Vector3 direction = endPos - startPos;
         float distance = direction.magnitude;
@@ -32,5 +39,4 @@ public class forDrawExample : MonoBehaviour
         lineRectTransForm.anchoredPosition = startPos + direction * 0.5f;
         lineRectTransForm.rotation = Quaternion.Euler(0, 0, angle);
     }
-       
-}
+    }

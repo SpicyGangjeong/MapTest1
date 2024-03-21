@@ -82,16 +82,17 @@ public class Room : MonoBehaviour
 
         // 선의 각도를 계산합니다.
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        // 90도 기준으로 >90이면 angle - 90 <90이면 90-angle 계산 해줘야함
 
+        // 선을 생성합니다.
         GameObject line = Instantiate(linePrefab, gameObject.transform) as GameObject;
-        RectTransform lineRectTransForm = line.GetComponent<RectTransform>();
+        RectTransform lineRectTransform = line.GetComponent<RectTransform>();
 
+        // 선의 크기 및 위치, 회전을 설정합니다.
+        lineRectTransform.sizeDelta = new Vector2(distance, lineRectTransform.sizeDelta.y);
+        lineRectTransform.anchoredPosition = (direction * 0.5f);
+        lineRectTransform.rotation = Quaternion.Euler(0, 0, angle);
 
-
-        // 선의 위치 및 회전을 설정합니다.
-        lineRectTransForm.sizeDelta = new Vector2(distance, lineRectTransForm.sizeDelta.y);
-        lineRectTransForm.anchoredPosition = startPos + direction * 0.5f;
-        lineRectTransForm.rotation = Quaternion.Euler(0, 0, angle);
 
     }
 }
