@@ -10,7 +10,7 @@ public class Room : MonoBehaviour
     public GameObject[] AfterRoom;
     [SerializeField]
     public GameObject linePrefab;
-    public RectTransform[] linePoints;
+    public Transform[] linePoints;
     public bool isAvailable = false;
     RectTransform rectTransform;
 
@@ -22,7 +22,7 @@ public class Room : MonoBehaviour
     {
         BeforeRoom = new GameObject[maxRoom];
         AfterRoom = new GameObject[maxRoom];
-        linePoints = new RectTransform[maxRoom]; 
+        linePoints = new Transform[maxRoom]; 
         rectTransform = gameObject.GetComponent<RectTransform>();
     }
 
@@ -42,10 +42,10 @@ public class Room : MonoBehaviour
         {
             if (linePoints[i] == null)
             {
-                linePoints[i] = objRoom.GetComponent<RectTransform>();
-                /*Debug.Log("Now Room / RectPos = " + gameObject.name + "\'s World Position " + transform.name + transform.parent.name + transform.parent.GetComponent<RectTransform>().position + transform.GetComponent<RectTransform>().position + transform.GetComponent<RectTransform>().localPosition
-                    + "\nobjRoom = " + objRoom.name + "\'s WorldPosition " + objRoom.transform.parent.TransformPoint(objRoom.GetComponent<RectTransform>().localPosition));*/
-                break;
+                linePoints[i] = objRoom.transform;
+                /*Debug.Log("Now Room / RectPos = " + gameObject.name + gameObject.transform.localPosition + "_" + transform.parent.name + transform.parent.GetComponent<RectTransform>().position
+                    + "\nobjRoom = " + objRoom.name + objRoom.transform.localPosition + "_" + objRoom.transform.parent.name + objRoom.transform.parent.GetComponent<RectTransform>().position);
+                */break;
             }
         }
     }
@@ -70,7 +70,8 @@ public class Room : MonoBehaviour
             {
                 break;
             }
-            DrawLine(rectTransform.position, linePoints[i].position);
+            //Debug.Log(transform.position + "" + linePoints[i].position);
+            DrawLine(transform.parent.GetComponent<RectTransform>().position + transform.localPosition, linePoints[i].parent.GetComponent<RectTransform>().position + linePoints[i].localPosition);
         }
     }
     // 두 점 사이에 라인을 그리는 함수
@@ -78,11 +79,11 @@ public class Room : MonoBehaviour
     {
         // 시작점과 끝점 간의 거리를 계산합니다.
         Vector3 direction = endPos - startPos;
+        direction.y = direction.y / 2;
         float distance = direction.magnitude;
 
         // 선의 각도를 계산합니다.
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        // 90도 기준으로 >90이면 angle - 90 <90이면 90-angle 계산 해줘야함
 
         // 선을 생성합니다.
         GameObject line = Instantiate(linePrefab, gameObject.transform) as GameObject;
