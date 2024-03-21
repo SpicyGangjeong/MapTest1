@@ -351,6 +351,7 @@
 "Assets/Script/Room.cs"
 "Assets/Script/ShowYourPosition.cs"
 "Assets/Script/Types.cs"
+"Assets/Script/WeightedRandomPicker.cs"
 -langversion:9.0
 
 /deterministic

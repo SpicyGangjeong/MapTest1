@@ -95,3 +95,11 @@ MonoBehaviour:
   linePrefab: {fileID: 2336019937006722970, guid: 361ad5ed9b1564f44b215f2925edfa07, type: 3}
   linePoints: []
   isAvailable: 0
+  bossSprite: {fileID: 21300000, guid: 8e176c6cb652032479f07ad080ad30f0, type: 3}
+  battleSprite: {fileID: 21300000, guid: f9f46487cff25064f99c3348810a0fe0, type: 3}
+  eliteSprite: {fileID: 21300000, guid: e8a140368bb6d07479858d84a9eb933d, type: 3}
+  treasureSprite: {fileID: 21300000, guid: 11702615c02fc9e4797d887c4bdea3de, type: 3}
+  eventSprite: {fileID: 21300000, guid: 968ef5836d466f743a3a790e1da9f5f2, type: 3}
+  mapCompleteSprite: {fileID: 21300000, guid: a8627215a8364dd45af0c142ed1ffae4, type: 3}
+  restSprite: {fileID: 21300000, guid: e2047e9b0bc138146a7e892389318130, type: 3}
+  merchantSprite: {fileID: 21300000, guid: 8ca0f51ab891615409adb9612ce62981, type: 3}

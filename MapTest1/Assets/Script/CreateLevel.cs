@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CreateLevel : MonoBehaviour
@@ -46,7 +47,7 @@ public class CreateLevel : MonoBehaviour
                 count_room++;
                 currentRoomNumber++;
 
-                if (currentLevel == _maxLevel - 1 || currentLevel == 0) // 마지막 레벨은 방이 항상 1개
+                if (currentLevel == _maxLevel - 1) // 마지막 레벨은 방이 항상 1개
                 {
                     depth += _maxRoom;
                 }
@@ -54,13 +55,13 @@ public class CreateLevel : MonoBehaviour
                 {
                     depth += _maxRoom;
                 }
-                else if (currentLevel == 1) // 전개 레벨
+                else if (currentLevel == 1 || currentLevel == _maxLevel - 2) // 전개 레벨 및 휴식 레벨
                 {
                     depth += (int)Mathf.Ceil(_maxRoom / 3);
                 }
                 else // 그 외 레벨
                 {
-                    depth += random.Next(1, 5); // 1~ 4추가
+                    depth += random.Next(1, 4); // 1~ 4추가
                 }
             }
         }
@@ -96,7 +97,6 @@ public class CreateLevel : MonoBehaviour
         int nextChildCount = nextLevel.transform.childCount;
         int currentChildCount = currentLevel.transform.childCount;
         GameObject selectedRoom;
-        int randomIndex;
         List<int> indexes = new List<int>(); // 현재 방에서 길을 연결할 대상 방들을 나타내는 인덱스
         
         if (currentChildCount != 1)
@@ -105,50 +105,28 @@ public class CreateLevel : MonoBehaviour
             {
                 // 첫 번째 조건: 무조건 하나는 선택
                 // 빈 방 찾기 알고리즘
-                List<int> checkedIndexes = new List<int>();
-                while (true) 
-                {
-                    randomIndex = UnityEngine.Random.Range(0, nextChildCount);
-                    if (checkedIndexes.Contains(randomIndex)) // true: randomIndex의 방은 차 있음, false : 확인안함
-                    {
-                        continue;
-                    }
-                    // 방 차있는지 확인하기
-                    selectedRoom = nextLevel.transform.GetChild(randomIndex).gameObject;
-                    if (selectedRoom.GetComponent<Room>().BeforeRoom[0] == null) // 목표방에 길이 없으면 탈출
-                    {
-                        indexes.Add(randomIndex); // 길을 연결하라고 인덱스 추가
-                        break;
-                    }
-                    // 점유된 방이므로 빈방이 아니라고 표시
-                    checkedIndexes.Add(randomIndex);
-                    if (checkedIndexes.Count == nextChildCount) // 모든 방이 점유 되었다면
-                    {
-                        indexes.Add(randomIndex); // 걍 아무거나 골라서 가지고 나감
-                        break;
-                    }
-                }
+                FindUnconnectedRoom(nextLevel, nextChildCount, indexes);
 
-                // 두 번째 조건: 자식 갯수가 여러개이면, 40% 확률로 추가적으로 하나를 선택
-                while (indexes.Count < nextChildCount && UnityEngine.Random.Range(0f, 1f) < 0.4f)
-                {
-                    int additionalRandomIndex = UnityEngine.Random.Range(0, nextChildCount);
-                    // 이미 선택한 자식과 중복되지 않도록 한다
-                    while (indexes.Contains(additionalRandomIndex))
-                    {
-                        additionalRandomIndex = UnityEngine.Random.Range(0, nextChildCount);
-                    }
-                    indexes.Add(additionalRandomIndex);
-                }
-
-                indexes.Sort();
-                for (int i = 0; i < indexes.Count ;i++)
-                {
-                    objectiveRooms.Add(nextLevel.transform.GetChild(indexes[i]).gameObject);
-                }
+                // 두 번째 조건: 자식 갯수가 여러개이면, 확률로 추가적으로 하나를 선택
+                RandomizeConnectionRoom(nextLevel, objectiveRooms, nextChildCount, indexes);
             }
             else // currentChildCount < nextChildCount
             {
+                // 첫 번째 조건: 무조건 하나는 선택
+                // 빈 방 찾기 알고리즘
+                float minimumRoomCount = MathF.Ceiling((float)nextChildCount / (float)currentChildCount);
+                while (minimumRoomCount > indexes.Count)
+                {
+                    FindUnconnectedRoom(nextLevel, nextChildCount, indexes);
+                    indexes = indexes.Distinct().ToList();
+                }
+                string forDebug = "";
+                for(int i=0; i < indexes.Count; i++)
+                {
+                    forDebug += indexes[i];
+                }
+                // 두 번째 조건: 자식 갯수가 여러개이면, 확률로 추가적으로 하나를 선택
+                RandomizeConnectionRoom(nextLevel, objectiveRooms, nextChildCount, indexes);
 
             }
         } 
@@ -163,11 +141,59 @@ public class CreateLevel : MonoBehaviour
         return objectiveRooms.ToArray();
     }
 
+    private static void RandomizeConnectionRoom(GameObject nextLevel, List<GameObject> objectiveRooms, int nextChildCount, List<int> indexes, float randomRatio = 0.01f)
+    {
+        while (indexes.Count < nextChildCount && UnityEngine.Random.Range(0f, 1f) < randomRatio)
+        {
+            int additionalRandomIndex = UnityEngine.Random.Range(0, nextChildCount);
+            // 이미 선택한 자식과 중복되지 않도록 한다
+            while (indexes.Contains(additionalRandomIndex))
+            {
+                additionalRandomIndex = UnityEngine.Random.Range(0, nextChildCount);
+            }
+            indexes.Add(additionalRandomIndex);
+        }
+
+        indexes.Sort();
+        for (int i = 0; i < indexes.Count; i++)
+        {
+            objectiveRooms.Add(nextLevel.transform.GetChild(indexes[i]).gameObject);
+        }
+    }
+
+    private static void FindUnconnectedRoom(GameObject nextLevel, int nextChildCount, List<int> indexes)
+    {
+        int randomIndex;
+        List<int> checkedIndexes = new List<int>();
+        while (true)
+        {
+            randomIndex = UnityEngine.Random.Range(0, nextChildCount);
+            if (checkedIndexes.Contains(randomIndex)) // true: randomIndex의 방은 차 있음, false : 확인안함
+            {
+                continue;
+            }
+            // 방 차있는지 확인하기
+            if (nextLevel.transform.GetChild(randomIndex).gameObject.GetComponent<Room>().BeforeRoom[0] == null && !indexes.Contains(randomIndex)) // 목표방에 길이 없으면 탈출
+            {
+                indexes.Add(randomIndex); // 길을 연결하라고 인덱스 추가
+                break;
+            }
+            // 점유된 방이므로 빈방이 아니라고 표시
+            checkedIndexes.Add(randomIndex);
+            if (checkedIndexes.Count == nextChildCount) // 모든 방이 점유 되었다면
+            {
+                indexes.Add(randomIndex); // 걍 아무거나 골라서 가지고 나감
+                break;
+            }
+        }
+    }
+
 
     // 프레임 이후 작업
     IEnumerator buildForGrid()
     {
         yield return null;
         buildBridge();
+        gameObject.GetComponent<RectTransform>().localScale = new Vector3(4f, 2f, 1f);
     }
 }

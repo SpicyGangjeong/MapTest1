@@ -1,24 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Room : MonoBehaviour
 {
     [SerializeField]
-    public Types.RoomType _roomType = Types.RoomType.Battle;
+    public Types.RoomType _roomType;
     public GameObject[] BeforeRoom; 
     public GameObject[] AfterRoom; 
     [SerializeField]
     public GameObject linePrefab;
     public Transform[] linePoints;
     public bool isAvailable = false;
+    public Sprite bossSprite;
+    public Sprite battleSprite;
+    public Sprite eliteSprite;
+    public Sprite treasureSprite;
+    public Sprite eventSprite;
+    public Sprite mapCompleteSprite;
+    public Sprite restSprite;
+    public Sprite merchantSprite;
+
     int _maximumRoom;
     int _currentRoomNumber;
     int _currentLevel;
 
+
     private void Start()
     {
-        
+        StartCoroutine(BuildRoom());
     }
     public void setEnvironment(int currentRoomNumber, int currentLevel, int maxRoom)
     {
@@ -28,7 +39,9 @@ public class Room : MonoBehaviour
         
         BeforeRoom = new GameObject[maxRoom];
         AfterRoom = new GameObject[maxRoom];
-        linePoints = new Transform[maxRoom]; 
+        linePoints = new Transform[maxRoom];
+
+
     }
 
     public void setNextRoom(GameObject objRoom)
@@ -81,7 +94,7 @@ public class Room : MonoBehaviour
                 break;
             }
             //Debug.Log(transform.position + "" + linePoints[i].position);
-            DrawLine(transform.parent.GetComponent<RectTransform>().position + transform.localPosition, linePoints[i].parent.GetComponent<RectTransform>().position + linePoints[i].localPosition);
+            DrawLine(transform.parent.GetComponent<RectTransform>().position + transform.localPosition + (Vector3.up * 5) , linePoints[i].parent.GetComponent<RectTransform>().position + linePoints[i].localPosition);
         }
     }
     // 두 점 사이에 라인을 그리는 함수
@@ -89,7 +102,7 @@ public class Room : MonoBehaviour
     {
         // 시작점과 끝점 간의 거리를 계산합니다.
         Vector3 direction = endPos - startPos;
-        direction.y = direction.y / 2;
+        // direction.y = direction.y;     <<<=== Y값 터지면 조절해야함. TODO
         float distance = direction.magnitude;
 
         // 선의 각도를 계산합니다.
@@ -105,5 +118,118 @@ public class Room : MonoBehaviour
         lineRectTransform.rotation = Quaternion.Euler(0, 0, angle);
 
 
+    }
+
+    IEnumerator BuildRoom()
+    {
+        yield return null;
+
+        switch (_currentLevel)
+        {
+            case 1:
+                _roomType = Types.RoomType.Battle;
+                break;
+            case 9:
+                _roomType = Types.RoomType.Treasure;
+                break;
+            case 15:
+                _roomType = Types.RoomType.Rest;
+                break;
+            case 16:
+                _roomType = Types.RoomType.Boss;
+                break;
+            default:
+                Types types = new Types();
+                WeightedRandomPicker<Types.RoomType> picker = new WeightedRandomPicker<Types.RoomType>();
+                foreach (KeyValuePair<Types.RoomType, int> item in types.EncounterPairs)
+                {
+                    picker.AddItem(item.Key, item.Value);
+                }
+                _roomType = picker.PickRandom(); //랜덤배치
+
+                bool NotAvailableRoom = true;
+                do
+                {
+                    NotAvailableRoom = false;
+                    if ((_currentLevel <= 6 && _roomType == Types.RoomType.Rest) || (_currentLevel <= 6 && _roomType == Types.RoomType.Elite)) // 6층 이하에는 엘리트, 휴식 금지
+                    {
+                        _roomType = picker.PickRandom();
+                        while (_roomType == Types.RoomType.Elite || _roomType == Types.RoomType.Rest)
+                        {
+                            _roomType = picker.PickRandom();
+                        }
+                        NotAvailableRoom = true;
+                    }
+                    switch (_roomType) // 연속된 엘리트, 상점, 휴식 금지
+                    {
+                        case Types.RoomType.Elite:
+                        case Types.RoomType.Merchant:
+                        case Types.RoomType.Rest:
+                            for (int i = 0; i < BeforeRoom.Length; i++)
+                            {
+                                if (BeforeRoom[i] == null) break;
+                                Room ancestorRoom = BeforeRoom[i].GetComponent<Room>();
+                                if (ancestorRoom._roomType == _roomType)
+                                {
+                                    _roomType = picker.PickRandom();
+                                    NotAvailableRoom = true;
+                                    break;
+                                }
+                            }
+                            break;
+                        default: break;
+                    }
+                    /*if (_roomType == Types.RoomType.Battle || _roomType == Types.RoomType.Elite) // TODO 연속된 전투조우 방지
+                    {
+                        for (int i )
+                    }*/
+
+                    if (_currentLevel == 14 && _roomType == Types.RoomType.Rest) // 14층에는 휴식 x
+                    {
+                        _roomType = picker.PickRandom();
+                        while (_roomType == Types.RoomType.Rest)
+                        {
+                            _roomType = picker.PickRandom();
+                        }
+                        NotAvailableRoom = true;
+                    }
+
+                } while (NotAvailableRoom);
+                break;
+        }
+        Image imageComponent = gameObject.GetComponent<Image>();
+        switch (_roomType)
+        {
+            case Types.RoomType.Boss:
+                imageComponent.sprite = bossSprite; // 보스 방 이미지 할당
+                imageComponent.color = Color.red;
+                break;
+            case Types.RoomType.Battle:
+                imageComponent.sprite = battleSprite; // 전투 방 이미지 할당
+                imageComponent.color = Color.red;
+                break;
+            case Types.RoomType.Elite:
+                imageComponent.sprite = eliteSprite; // 엘리트 방 이미지 할당
+                imageComponent.color = Color.red;
+                break;
+            case Types.RoomType.Event:
+                imageComponent.sprite = eventSprite; // 이벤트 방 이미지 할당
+                imageComponent.color = Color.blue;
+                break;
+            case Types.RoomType.Merchant:
+                imageComponent.sprite = merchantSprite; // 상점 방 이미지 할당
+                imageComponent.color = Color.green;
+                break;
+            case Types.RoomType.Treasure:
+                imageComponent.sprite = treasureSprite; // 보물 방 이미지 할당
+                imageComponent.color = Color.magenta;
+                break;
+            case Types.RoomType.Rest:
+                imageComponent.sprite = restSprite; // 휴식 방 이미지 할당
+                imageComponent.color = Color.yellow;
+                break;
+            default:
+                break;
+        }
     }
 }
