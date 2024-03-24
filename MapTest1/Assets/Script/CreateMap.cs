@@ -5,7 +5,8 @@ using UnityEngine;
 public class CreateMap : MonoBehaviour
 {
     [SerializeField]
-    public GameObject MainPanel;
+    public GameObject Content;
+    public GameObject scrollViewViewPort;
     public GameObject instanceMainPanel;
     public void Start()
     {
@@ -21,21 +22,25 @@ public class CreateMap : MonoBehaviour
     }
     void DestroyPanel()
     {
-        if (gameObject.transform.Find("MainPanel") != null)
+        if (scrollViewViewPort.transform.Find("Content") != null)
         {
-            Destroy(instanceMainPanel);
+            instanceMainPanel.transform.GetComponent<CreateLevel>().CustomDestroy();
             return;
         }
-        Debug.Log("MainPanel is not exist");
+        else Debug.Log("MainPanel is not exist");
     }
     void CreatePanel()
     {
-        if (gameObject.transform.Find("MainPanel") == null)
+        if (scrollViewViewPort.transform.Find("Content") == null)
         {
-            instanceMainPanel = Instantiate(MainPanel, gameObject.transform) as GameObject;
-            instanceMainPanel.name = "MainPanel";
+            instanceMainPanel = Instantiate(Content, scrollViewViewPort.transform) as GameObject;
+            instanceMainPanel.name = "Content";
             return;
         }
-        Debug.Log("MainPanel is Already exist");
+        else
+        {
+            Debug.Log("MainPanel is Already exist");
+            instanceMainPanel = scrollViewViewPort.transform.Find("Content").gameObject;
+        }
     }
 }

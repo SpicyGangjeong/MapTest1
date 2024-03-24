@@ -102,9 +102,11 @@ public class Room : MonoBehaviour
     {
         // 시작점과 끝점 간의 거리를 계산합니다.
         Vector3 direction = endPos - startPos;
-        // direction.y = direction.y;     <<<=== Y값 터지면 조절해야함. TODO
+        // direction.y = direction.y / 2;   //  <<<=== Y값 터지면 조절해야함. TODO
+
         float distance = direction.magnitude;
 
+        Debug.Log(startPos + "\n" + endPos + "\n" + direction + "\n" + distance);
         // 선의 각도를 계산합니다.
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
@@ -193,7 +195,24 @@ public class Room : MonoBehaviour
                         }
                         NotAvailableRoom = true;
                     }
-
+                    /* // 같은 부모에서 나온 자식 방들이 같은 룸타입임을 방지하는 코드지만 특성상 비활성화함
+                    for(int i = 0; i < BeforeRoom.Length; i++)
+                    {
+                        if (BeforeRoom[i] == null) break;
+                        for (int j = 0; j < AfterRoom.Length; j++)
+                        {
+                            if (BeforeRoom[i].GetComponent<Room>().AfterRoom[j] == null) break;
+                            if (_roomType == BeforeRoom[i].GetComponent<Room>().AfterRoom[j].GetComponent<Room>()._roomType)
+                            {
+                                _roomType = picker.PickRandom();
+                                while (_roomType == BeforeRoom[i].GetComponent<Room>().AfterRoom[j].GetComponent<Room>()._roomType)
+                                {
+                                    _roomType = picker.PickRandom();
+                                }
+                                NotAvailableRoom = true;
+                            }
+                        }
+                    }*/
                 } while (NotAvailableRoom);
                 break;
         }

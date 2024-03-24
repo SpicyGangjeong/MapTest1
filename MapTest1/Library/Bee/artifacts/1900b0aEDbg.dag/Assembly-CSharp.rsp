@@ -348,6 +348,7 @@
 "Assets/Script/CreateLevel.cs"
 "Assets/Script/CreateMap.cs"
 "Assets/Script/forDrawExample.cs"
+"Assets/Script/MapScrollController.cs"
 "Assets/Script/Room.cs"
 "Assets/Script/ShowYourPosition.cs"
 "Assets/Script/Types.cs"

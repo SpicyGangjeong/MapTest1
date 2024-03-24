@@ -192,8 +192,23 @@ public class CreateLevel : MonoBehaviour
     // 프레임 이후 작업
     IEnumerator buildForGrid()
     {
-        yield return null;
+        yield return new WaitForSeconds(1f);
         buildBridge();
         gameObject.GetComponent<RectTransform>().localScale = new Vector3(4f, 2f, 1f);
     }
+
+    public void CustomDestroy()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            
+            Destroy(transform.GetChild(i).gameObject);
+        }
+        _maxLevel = 17;
+        _maxRoom = 6;
+        nowLevel = null;
+        count_room = 0;
+        Start();
+    }
+
 }
