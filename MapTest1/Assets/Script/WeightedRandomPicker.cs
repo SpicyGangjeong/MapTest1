@@ -6,7 +6,10 @@ public class WeightedRandomPicker<T>
     private Random random = new Random();
     private List<T> items = new List<T>();
     private List<int> weights = new List<int>();
-
+    /*
+     * 아이템, 지분을 넣으면
+     * 아이템이 차지하는 지분만큼의 확률로 뽑아서 내놓음
+     */
     public void AddItem(T item, int weight)
     {
         items.Add(item);

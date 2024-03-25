@@ -4,10 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+
 public class Room : MonoBehaviour,
+    IPointerClickHandler,
     IPointerEnterHandler,
     IPointerExitHandler
 {
+    // 프리팹들 대부분 재할당해야함. ->> 이사 이후에는 Resource.Load를 배워서 동적생성할 것.
     [SerializeField]
     public Types.RoomType _roomType;
     public GameObject[] BeforeRoom; 
@@ -30,7 +33,7 @@ public class Room : MonoBehaviour,
     int _currentLevel;
     public Vector3 minScale = new Vector3(1f, 1f, 1f);
     public Vector3 maxScale = new Vector3(2f, 2f, 2f);
-    public float duration = 1f;
+    public float duration = 0.5f;
     public Coroutine breathCoroutine;
     public bool breathControlFlag = true;   
 
@@ -131,37 +134,46 @@ public class Room : MonoBehaviour,
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Enter" + gameObject.name);
+        // 호버링
+        // if (isAvailable) { Hover(); } // TODO 현재 노드에서 움직일 수 있는 곳에서만 호버링 가능하게 할것
+        // TODO 호버링 하면 방에 대한 정보가 외부 창에 넘겨줄 수 있도록 할 것
         Hover();
     }
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("Exit" + gameObject.name);
+        // 호버링 종료
         Descend();
         
     }
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        throw new System.NotImplementedException();
+        // isAvailable한 방 눌렀으면
+        // 현재방의 다음방 검색해서 누른방 아니면 isAvailable false 시키고
+        // 현재 방도 isAvailable false 시키고
+        // 누른방의 다음 방들 isAvailable true 시키고
+        // 전투페이즈로 넘어감
+    }
     public void Hover()
     {
-        transform.localScale = new Vector3(2, 2, 2);
         breathControlFlag = true;
         breathCoroutine =StartCoroutine(StartBreath());
-        for (int i = 0; i < AfterRoom.Length; i++)
+        for (int i = 0; i < AfterRoom.Length; i++) // 노드들 따라서 호버링 시킴
         {
             if (AfterRoom[i] == null) break;
-            AfterRoom[i].GetComponent<Room>().Hover();
+            AfterRoom[i].GetComponent<Room>().Hover(); 
         }
     }
     public void Descend()
     {
         breathControlFlag = false;
-        transform.localScale = new Vector3(1, 1, 1);
         for (int i = 0; i < AfterRoom.Length; i++)
         {
             if (AfterRoom[i] == null) break;
             AfterRoom[i].GetComponent<Room>().Descend();
         }
     }
-    IEnumerator StartBreath()
+    IEnumerator StartBreath() // Hover하면 계속반복, Descend하면 반복종료
     {
         while (breathControlFlag)
         {
@@ -173,13 +185,27 @@ public class Room : MonoBehaviour,
     {
         float startTime = Time.time;
         float endTime = startTime + duration;
-        while(Time.time < endTime)
+        Vector3[] childPosition = new Vector3[transform.childCount]; // 자식노드들의 위치를 기억해서 자식까지 Scale의 영향주는거 방지
+        for (int i = 0; i < transform.childCount; i++) 
+        {
+            childPosition[i] = transform.GetChild(i).position;
+        }
+        while (Time.time < endTime)
         {
             float progress = (Time.time - startTime) / duration;
-            transform.localScale = Vector3.Lerp(startScale, endScale, progress);
+            transform.localScale = Vector3.Lerp(startScale, endScale, progress); // 현재 방 스케일
+
+            for (int i = 0; i < transform.childCount; i++) // 자식노드들 스케일 방지, 포지션 변경 방지
+            {
+                RectTransform child = gameObject.GetComponent<RectTransform>().GetChild(i).GetComponent<RectTransform>();
+                Vector3 localScale = child.localScale;
+                Vector3 inverseScaleChange = new Vector3(1f / transform.localScale.x, 1f / transform.localScale.y, 1f / transform.localScale.z);
+                child.localScale = Vector3.Lerp(localScale, inverseScaleChange, progress); // 자식 스케일 조정
+                child.position = new Vector3(childPosition[i].x , childPosition[i].y , childPosition[i].z ); // 자식 포지션 조정 // TODO 이거 할때는 스크롤락 걸어야함.
+            }
             yield return null;
         }
-        transform.localScale = endScale;
+        transform.localScale = endScale; // 다끝나면 1프레임 뒤에 스케일 펌핑하는거 방지
     }
     IEnumerator BuildRoom()
     {
@@ -254,7 +280,7 @@ public class Room : MonoBehaviour,
                         }
                         NotAvailableRoom = true;
                     }
-                    /* // 같은 부모에서 나온 자식 방들이 같은 룸타입임을 방지하는 코드지만 특성상 비활성화함
+                    /* // 같은 부모에서 나온 자식 방들이 같은 룸타입임을 방지하는 코드지만 무한루프 가능성 다분해서 비활성화함 -> 인겜에서 연속전투시 버프주기로 함
                     for(int i = 0; i < BeforeRoom.Length; i++)
                     {
                         if (BeforeRoom[i] == null) break;
@@ -310,5 +336,4 @@ public class Room : MonoBehaviour,
                 break;
         }
     }
-
 }

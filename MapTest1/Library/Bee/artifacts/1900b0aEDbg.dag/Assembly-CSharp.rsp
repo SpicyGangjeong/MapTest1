@@ -350,7 +350,6 @@
 "Assets/Script/MapScrollController.cs"
 "Assets/Script/Room.cs"
 "Assets/Script/Types.cs"
-"Assets/Script/UIController.cs"
 "Assets/Script/WeightedRandomPicker.cs"
 -langversion:9.0
 
