@@ -33,7 +33,7 @@ public class WeightedRandomPicker<T>
             }
         }
 
-        // 이 지점에 도달하는 것은 보통 발생하지 않지만, 에러 핸들링을 위해 기본값을 반환합니다.
+        // 이 지점에 도달하는 것은 보통 발생하지 않지만, 에러 핸들링을 위해 기본값을 반환.
         return default(T);
     }
 }

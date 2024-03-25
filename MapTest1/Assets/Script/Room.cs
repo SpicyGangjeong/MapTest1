@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class Room : MonoBehaviour
+public class Room : MonoBehaviour,
+    IPointerEnterHandler,
+    IPointerExitHandler
 {
     [SerializeField]
     public Types.RoomType _roomType;
@@ -21,10 +24,15 @@ public class Room : MonoBehaviour
     public Sprite mapCompleteSprite;
     public Sprite restSprite;
     public Sprite merchantSprite;
-
+    
     int _maximumRoom;
     int _currentRoomNumber;
     int _currentLevel;
+    public Vector3 minScale = new Vector3(1f, 1f, 1f);
+    public Vector3 maxScale = new Vector3(2f, 2f, 2f);
+    public float duration = 1f;
+    public Coroutine breathCoroutine;
+    public bool breathControlFlag = true;   
 
 
     private void Start()
@@ -94,7 +102,7 @@ public class Room : MonoBehaviour
                 break;
             }
             //Debug.Log(transform.position + "" + linePoints[i].position);
-            DrawLine(transform.parent.GetComponent<RectTransform>().position + transform.localPosition + (Vector3.up * 5) , linePoints[i].parent.GetComponent<RectTransform>().position + linePoints[i].localPosition);
+            DrawLine(transform.parent.GetComponent<RectTransform>().position + transform.localPosition , linePoints[i].parent.GetComponent<RectTransform>().position + linePoints[i].localPosition + (Vector3.up * 5));
         }
     }
     // 두 점 사이에 라인을 그리는 함수
@@ -106,7 +114,7 @@ public class Room : MonoBehaviour
 
         float distance = direction.magnitude;
 
-        Debug.Log(startPos + "\n" + endPos + "\n" + direction + "\n" + distance);
+        // Debug.Log(startPos + "\n" + endPos + "\n" + direction + "\n" + distance);
         // 선의 각도를 계산합니다.
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
@@ -121,7 +129,58 @@ public class Room : MonoBehaviour
 
 
     }
-
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Debug.Log("Enter" + gameObject.name);
+        Hover();
+    }
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        Debug.Log("Exit" + gameObject.name);
+        Descend();
+        
+    }
+    public void Hover()
+    {
+        transform.localScale = new Vector3(2, 2, 2);
+        breathControlFlag = true;
+        breathCoroutine =StartCoroutine(StartBreath());
+        for (int i = 0; i < AfterRoom.Length; i++)
+        {
+            if (AfterRoom[i] == null) break;
+            AfterRoom[i].GetComponent<Room>().Hover();
+        }
+    }
+    public void Descend()
+    {
+        breathControlFlag = false;
+        transform.localScale = new Vector3(1, 1, 1);
+        for (int i = 0; i < AfterRoom.Length; i++)
+        {
+            if (AfterRoom[i] == null) break;
+            AfterRoom[i].GetComponent<Room>().Descend();
+        }
+    }
+    IEnumerator StartBreath()
+    {
+        while (breathControlFlag)
+        {
+            yield return StartCoroutine(ScaleCoroutine(minScale, maxScale, duration));
+            yield return StartCoroutine(ScaleCoroutine(maxScale, minScale, duration));
+        }
+    }
+    IEnumerator ScaleCoroutine(Vector3 startScale, Vector3 endScale, float duration)
+    {
+        float startTime = Time.time;
+        float endTime = startTime + duration;
+        while(Time.time < endTime)
+        {
+            float progress = (Time.time - startTime) / duration;
+            transform.localScale = Vector3.Lerp(startScale, endScale, progress);
+            yield return null;
+        }
+        transform.localScale = endScale;
+    }
     IEnumerator BuildRoom()
     {
         yield return null;
@@ -251,4 +310,5 @@ public class Room : MonoBehaviour
                 break;
         }
     }
+
 }

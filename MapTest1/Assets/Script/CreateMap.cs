@@ -5,9 +5,8 @@ using UnityEngine;
 public class CreateMap : MonoBehaviour
 {
     [SerializeField]
-    public GameObject Content;
-    public GameObject scrollViewViewPort;
-    public GameObject instanceMainPanel;
+    public GameObject scrollView;
+    public GameObject instanceScrollView;
     public void Start()
     {
         CreatePanel();
@@ -22,25 +21,25 @@ public class CreateMap : MonoBehaviour
     }
     void DestroyPanel()
     {
-        if (scrollViewViewPort.transform.Find("Content") != null)
+        if (transform.Find("Scroll View") != null)
         {
-            instanceMainPanel.transform.GetComponent<CreateLevel>().CustomDestroy();
+            Destroy(instanceScrollView);
             return;
         }
-        else Debug.Log("MainPanel is not exist");
+        else Debug.Log("Scroll View is not exist");
     }
     void CreatePanel()
     {
-        if (scrollViewViewPort.transform.Find("Content") == null)
+        if (transform.Find("Scroll View") == null)
         {
-            instanceMainPanel = Instantiate(Content, scrollViewViewPort.transform) as GameObject;
-            instanceMainPanel.name = "Content";
+            instanceScrollView = Instantiate(scrollView, transform) as GameObject;
+            instanceScrollView.name = "Scroll View";
             return;
         }
         else
         {
-            Debug.Log("MainPanel is Already exist");
-            instanceMainPanel = scrollViewViewPort.transform.Find("Content").gameObject;
+            Debug.Log("Scroll View is Already exist");
+            instanceScrollView = transform.Find("Scroll View").gameObject;
         }
     }
 }
