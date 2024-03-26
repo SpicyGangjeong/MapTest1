@@ -10,14 +10,16 @@ public class Room : MonoBehaviour,
     IPointerEnterHandler,
     IPointerExitHandler
 {
-    // 프리팹들 대부분 재할당해야함. ->> 이사 이후에는 Resource.Load를 배워서 동적생성할 것.
+    // TODO 프리팹들 대부분 재할당해야함. ->> 이사 이후에는 Resource.Load를 배워서 동적생성할 것.
     [SerializeField]
     public Types.RoomType _roomType;
     public GameObject[] BeforeRoom; 
-    public GameObject[] AfterRoom; 
-    [SerializeField]
-    public GameObject linePrefab;
+    public GameObject[] AfterRoom;
     public Transform[] linePoints;
+    public GameObject linePrefab;
+    public GameObject realBeforeRoom;
+    public MapScrollController mapScrollController;
+    public bool isSelected = false;
     public bool isAvailable = false;
     public Sprite bossSprite;
     public Sprite battleSprite;
@@ -27,6 +29,7 @@ public class Room : MonoBehaviour,
     public Sprite mapCompleteSprite;
     public Sprite restSprite;
     public Sprite merchantSprite;
+
     
     int _maximumRoom;
     int _currentRoomNumber;
@@ -35,12 +38,16 @@ public class Room : MonoBehaviour,
     public Vector3 maxScale = new Vector3(2f, 2f, 2f);
     public float duration = 0.5f;
     public Coroutine breathCoroutine;
-    public bool breathControlFlag = true;   
-
+    bool breathControlFlag = true;
+    bool isHovered = false;
 
     private void Start()
     {
         StartCoroutine(BuildRoom());
+        if (transform.parent.parent.parent.parent.name == "Scroll View")
+        {
+            mapScrollController = transform.parent.parent.parent.parent.GetComponent<MapScrollController>();
+        }
     }
     public void setEnvironment(int currentRoomNumber, int currentLevel, int maxRoom)
     {
@@ -135,27 +142,86 @@ public class Room : MonoBehaviour,
     public void OnPointerEnter(PointerEventData eventData)
     {
         // 호버링
-        // if (isAvailable) { Hover(); } // TODO 현재 노드에서 움직일 수 있는 곳에서만 호버링 가능하게 할것
+        if (isAvailable && isHovered == false)
+        {
+            Hover();
+            Debug.Log("Hover");
+        }
         // TODO 호버링 하면 방에 대한 정보가 외부 창에 넘겨줄 수 있도록 할 것
-        Hover();
     }
     public void OnPointerExit(PointerEventData eventData)
     {
         // 호버링 종료
-        Descend();
+        if(isHovered) { Descend(); }
         
     }
     public void OnPointerClick(PointerEventData eventData)
     {
-        throw new System.NotImplementedException();
+        Debug.Log("" + (transform.parent.parent.GetComponent<CreateLevel>()._maxLevel - 1) + " " + _currentLevel);
         // isAvailable한 방 눌렀으면
-        // 현재방의 다음방 검색해서 누른방 아니면 isAvailable false 시키고
+        if (isAvailable)
+        {
+            if (_currentLevel == 0) // 시작방이면
+            {
+                isAvailable = false;
+                isSelected = true;
+                for (int i =0; i< AfterRoom.Length; i++)
+                {
+                    if (AfterRoom[i] == null) break;
+                    AfterRoom[i].GetComponent<Room>().isAvailable = true;
+                }
+                // TODO 시작방 이벤트 삽입
+            }
+            else if (_currentLevel == transform.parent.parent.GetComponent<CreateLevel>()._maxLevel - 1) // 보스방이면
+            {
+                isAvailable = false;
+                isSelected = true;
+                for (int i = 0; i< BeforeRoom.Length; i++)
+                {
+                    if (BeforeRoom[i].GetComponent<Room>().isSelected == true) // 이전방과 연결
+                    {
+                        realBeforeRoom = BeforeRoom[i];
+                        // TODO 보스방 이벤트 삽입
+                        break;
+                    }
+                    if (BeforeRoom[i] == null) break;
+                }
+            }
+            else // 기타방이면
+            {
+                isAvailable = false;
+                isSelected = true;
+                for (int i = 0; i < BeforeRoom.Length; i++) // 이전방 의존관계 설정
+                {
+                    if (BeforeRoom[i] == null) break;
+                    if (BeforeRoom[i].GetComponent<Room>().isSelected == true) // 진짜 이전방과 연결
+                    {
+                        realBeforeRoom = BeforeRoom[i];
+                        // 진짜 이전방의 다음방들의 isAvailable 차단
+                        for (int j = 0; j < BeforeRoom[i].GetComponent<Room>().AfterRoom.Length; j++) 
+                        {
+                            if (BeforeRoom[i].GetComponent<Room>().AfterRoom[i] == null) break; // TODO 여기 뭔가 이상함
+                            BeforeRoom[i].GetComponent<Room>().AfterRoom[i].GetComponent<Room>().isAvailable = false;
+                        }
+                    }
+                }
+                for (int i = 0; i < AfterRoom.Length; i++)
+                {
+                    if (AfterRoom[i] == null) break;
+                    AfterRoom[i].GetComponent<Room>().isAvailable = true;
+                }
+                // TODO 방 이벤트 연결
+            }
+
+        }
+        // 현재방 이전의 다음방 검색해서 누른방 아니면 isAvailable false 시키고
         // 현재 방도 isAvailable false 시키고
         // 누른방의 다음 방들 isAvailable true 시키고
         // 전투페이즈로 넘어감
     }
     public void Hover()
     {
+        isHovered = true;
         breathControlFlag = true;
         breathCoroutine =StartCoroutine(StartBreath());
         for (int i = 0; i < AfterRoom.Length; i++) // 노드들 따라서 호버링 시킴
@@ -166,6 +232,7 @@ public class Room : MonoBehaviour,
     }
     public void Descend()
     {
+        isHovered = false;
         breathControlFlag = false;
         for (int i = 0; i < AfterRoom.Length; i++)
         {
@@ -183,6 +250,7 @@ public class Room : MonoBehaviour,
     }
     IEnumerator ScaleCoroutine(Vector3 startScale, Vector3 endScale, float duration)
     {
+        mapScrollController.isScrollable = false;
         float startTime = Time.time;
         float endTime = startTime + duration;
         Vector3[] childPosition = new Vector3[transform.childCount]; // 자식노드들의 위치를 기억해서 자식까지 Scale의 영향주는거 방지
@@ -206,6 +274,10 @@ public class Room : MonoBehaviour,
             yield return null;
         }
         transform.localScale = endScale; // 다끝나면 1프레임 뒤에 스케일 펌핑하는거 방지
+        if (endScale.magnitude < startScale.magnitude)
+        {
+            mapScrollController.isScrollable = true;
+        }
     }
     IEnumerator BuildRoom()
     {
@@ -213,6 +285,10 @@ public class Room : MonoBehaviour,
 
         switch (_currentLevel)
         {
+            case 0:
+                _roomType = Types.RoomType.Rest;
+                isAvailable = true;
+                break;
             case 1:
                 _roomType = Types.RoomType.Battle;
                 break;
