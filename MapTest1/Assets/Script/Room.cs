@@ -10,7 +10,7 @@ public class Room : MonoBehaviour,
     IPointerEnterHandler,
     IPointerExitHandler
 {
-    // TODO ÇÁ¸®ÆÕµé ´ëºÎºĞ ÀçÇÒ´çÇØ¾ßÇÔ. ->> ÀÌ»ç ÀÌÈÄ¿¡´Â Resource.Load¸¦ ¹è¿ö¼­ µ¿Àû»ı¼ºÇÒ °Í.
+    // TODO í”„ë¦¬íŒ¹ë“¤ ëŒ€ë¶€ë¶„ ì¬í• ë‹¹í•´ì•¼í•¨. ->> ì´ì‚¬ ì´í›„ì—ëŠ” Resource.Loadë¥¼ ë°°ì›Œì„œ ë™ì ìƒì„±í•  ê²ƒ.
     [SerializeField]
     public Types.RoomType _roomType;
     public GameObject[] BeforeRoom; 
@@ -40,7 +40,7 @@ public class Room : MonoBehaviour,
     public Coroutine breathCoroutine;
     bool breathControlFlag = true;
     bool isHovered = false;
-
+    GameObject roomSprite;
     private void Start()
     {
         StartCoroutine(BuildRoom());
@@ -48,6 +48,7 @@ public class Room : MonoBehaviour,
         {
             mapScrollController = transform.parent.parent.parent.parent.GetComponent<MapScrollController>();
         }
+        roomSprite = transform.Find("RoomSprite").gameObject;
     }
     public void setEnvironment(int currentRoomNumber, int currentLevel, int maxRoom)
     {
@@ -64,7 +65,7 @@ public class Room : MonoBehaviour,
 
     public void setNextRoom(GameObject objRoom)
     {
-        for (int i = 0; i < AfterRoom.Length; i++) // ºó¹æÀ§Ä¡¿¡ ¹æ ÇÒ´ç
+        for (int i = 0; i < AfterRoom.Length; i++) // ë¹ˆë°©ìœ„ì¹˜ì— ë°© í• ë‹¹
         {
             if (AfterRoom[i] == null)
             {
@@ -74,7 +75,7 @@ public class Room : MonoBehaviour,
             }
         }
 
-        for (int i = 0; i < linePoints.Length; i++) // ¶óÀÎÆ÷ÀÎÆ®¿¡ objRoom.transform ÇÒ´ç
+        for (int i = 0; i < linePoints.Length; i++) // ë¼ì¸í¬ì¸íŠ¸ì— objRoom.transform í• ë‹¹
         {
             if (linePoints[i] == null)
             {
@@ -104,7 +105,7 @@ public class Room : MonoBehaviour,
 
     public void startDraw()
     {
-        // °¢°¢¿¡ ¶óÀÎ ÀÌ¹ÌÁö¸¦ »ı¼ºÇÏ¿© ¶óÀÎÀ» ±×¸³´Ï´Ù.
+        // ê°ê°ì— ë¼ì¸ ì´ë¯¸ì§€ë¥¼ ìƒì„±í•˜ì—¬ ë¼ì¸ì„ ê·¸ë¦½ë‹ˆë‹¤.
         for (int i = 0; i < linePoints.Length; i++)
         {
             if (linePoints[i] == null)
@@ -115,24 +116,24 @@ public class Room : MonoBehaviour,
             DrawLine(transform.parent.GetComponent<RectTransform>().position + transform.localPosition , linePoints[i].parent.GetComponent<RectTransform>().position + linePoints[i].localPosition + (Vector3.up * 5));
         }
     }
-    // µÎ Á¡ »çÀÌ¿¡ ¶óÀÎÀ» ±×¸®´Â ÇÔ¼ö
+    // ë‘ ì  ì‚¬ì´ì— ë¼ì¸ì„ ê·¸ë¦¬ëŠ” í•¨ìˆ˜
     void DrawLine(Vector3 startPos, Vector3 endPos)
     {
-        // ½ÃÀÛÁ¡°ú ³¡Á¡ °£ÀÇ °Å¸®¸¦ °è»êÇÕ´Ï´Ù.
+        // ì‹œì‘ì ê³¼ ëì  ê°„ì˜ ê±°ë¦¬ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
         Vector3 direction = endPos - startPos;
-        // direction.y = direction.y / 2;   //  <<<=== Y°ª ÅÍÁö¸é Á¶ÀıÇØ¾ßÇÔ. TODO
+        // direction.y = direction.y / 2;   //  <<<=== Yê°’ í„°ì§€ë©´ ì¡°ì ˆí•´ì•¼í•¨. TODO
 
         float distance = direction.magnitude;
 
         // Debug.Log(startPos + "\n" + endPos + "\n" + direction + "\n" + distance);
-        // ¼±ÀÇ °¢µµ¸¦ °è»êÇÕ´Ï´Ù.
+        // ì„ ì˜ ê°ë„ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        // ¼±À» »ı¼ºÇÕ´Ï´Ù.
+        // ì„ ì„ ìƒì„±í•©ë‹ˆë‹¤.
         GameObject line = Instantiate(linePrefab, gameObject.transform) as GameObject;
         RectTransform lineRectTransform = line.GetComponent<RectTransform>();
 
-        // ¼±ÀÇ Å©±â ¹× À§Ä¡, È¸ÀüÀ» ¼³Á¤ÇÕ´Ï´Ù.
+        // ì„ ì˜ í¬ê¸° ë° ìœ„ì¹˜, íšŒì „ì„ ì„¤ì •í•©ë‹ˆë‹¤.
         lineRectTransform.sizeDelta = new Vector2(distance, lineRectTransform.sizeDelta.y);
         lineRectTransform.anchoredPosition = (direction * 0.5f);
         lineRectTransform.rotation = Quaternion.Euler(0, 0, angle);
@@ -141,27 +142,27 @@ public class Room : MonoBehaviour,
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // È£¹ö¸µ
+        // í˜¸ë²„ë§
         if (isAvailable && isHovered == false)
         {
             Hover();
             Debug.Log("Hover");
         }
-        // TODO È£¹ö¸µ ÇÏ¸é ¹æ¿¡ ´ëÇÑ Á¤º¸°¡ ¿ÜºÎ Ã¢¿¡ ³Ñ°ÜÁÙ ¼ö ÀÖµµ·Ï ÇÒ °Í
+        // TODO í˜¸ë²„ë§ í•˜ë©´ ë°©ì— ëŒ€í•œ ì •ë³´ê°€ ì™¸ë¶€ ì°½ì— ë„˜ê²¨ì¤„ ìˆ˜ ìˆë„ë¡ í•  ê²ƒ
     }
     public void OnPointerExit(PointerEventData eventData)
     {
-        // È£¹ö¸µ Á¾·á
+        // í˜¸ë²„ë§ ì¢…ë£Œ
         if(isHovered) { Descend(); }
         
     }
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log("" + (transform.parent.parent.GetComponent<CreateLevel>()._maxLevel - 1) + " " + _currentLevel);
-        // isAvailableÇÑ ¹æ ´­·¶À¸¸é
+        // isAvailableí•œ ë°© ëˆŒë €ìœ¼ë©´
         if (isAvailable)
         {
-            if (_currentLevel == 0) // ½ÃÀÛ¹æÀÌ¸é
+            if (_currentLevel == 0) // ì‹œì‘ë°©ì´ë©´
             {
                 isAvailable = false;
                 isSelected = true;
@@ -170,38 +171,38 @@ public class Room : MonoBehaviour,
                     if (AfterRoom[i] == null) break;
                     AfterRoom[i].GetComponent<Room>().isAvailable = true;
                 }
-                // TODO ½ÃÀÛ¹æ ÀÌº¥Æ® »ğÀÔ
+                // TODO ì‹œì‘ë°© ì´ë²¤íŠ¸ ì‚½ì…
             }
-            else if (_currentLevel == transform.parent.parent.GetComponent<CreateLevel>()._maxLevel - 1) // º¸½º¹æÀÌ¸é
+            else if (_currentLevel == transform.parent.parent.GetComponent<CreateLevel>()._maxLevel - 1) // ë³´ìŠ¤ë°©ì´ë©´
             {
                 isAvailable = false;
                 isSelected = true;
                 for (int i = 0; i< BeforeRoom.Length; i++)
                 {
-                    if (BeforeRoom[i].GetComponent<Room>().isSelected == true) // ÀÌÀü¹æ°ú ¿¬°á
+                    if (BeforeRoom[i].GetComponent<Room>().isSelected == true) // ì´ì „ë°©ê³¼ ì—°ê²°
                     {
                         realBeforeRoom = BeforeRoom[i];
-                        // TODO º¸½º¹æ ÀÌº¥Æ® »ğÀÔ
+                        // TODO ë³´ìŠ¤ë°© ì´ë²¤íŠ¸ ì‚½ì…
                         break;
                     }
                     if (BeforeRoom[i] == null) break;
                 }
             }
-            else // ±âÅ¸¹æÀÌ¸é
+            else // ê¸°íƒ€ë°©ì´ë©´
             {
                 isAvailable = false;
                 isSelected = true;
-                for (int i = 0; i < BeforeRoom.Length; i++) // ÀÌÀü¹æ ÀÇÁ¸°ü°è ¼³Á¤
+                for (int i = 0; i < BeforeRoom.Length; i++) // ì´ì „ë°© ì˜ì¡´ê´€ê³„ ì„¤ì •
                 {
                     if (BeforeRoom[i] == null) break;
-                    if (BeforeRoom[i].GetComponent<Room>().isSelected == true) // ÁøÂ¥ ÀÌÀü¹æ°ú ¿¬°á
+                    if (BeforeRoom[i].GetComponent<Room>().isSelected == true) // ì§„ì§œ ì´ì „ë°©ê³¼ ì—°ê²°
                     {
                         realBeforeRoom = BeforeRoom[i];
-                        // ÁøÂ¥ ÀÌÀü¹æÀÇ ´ÙÀ½¹æµéÀÇ isAvailable Â÷´Ü
-                        for (int j = 0; j < BeforeRoom[i].GetComponent<Room>().AfterRoom.Length; j++) 
+                        // ì§„ì§œ ì´ì „ë°©ì˜ ë‹¤ìŒë°©ë“¤ì˜ isAvailable ì°¨ë‹¨
+                        for (int j = 0; j < realBeforeRoom.GetComponent<Room>().AfterRoom.Length; j++) 
                         {
-                            if (BeforeRoom[i].GetComponent<Room>().AfterRoom[i] == null) break; // TODO ¿©±â ¹º°¡ ÀÌ»óÇÔ
-                            BeforeRoom[i].GetComponent<Room>().AfterRoom[i].GetComponent<Room>().isAvailable = false;
+                            if (realBeforeRoom.GetComponent<Room>().AfterRoom[j] == null) break; // TODO ì—¬ê¸° ë­”ê°€ ì´ìƒí•¨
+                            realBeforeRoom.GetComponent<Room>().AfterRoom[j].GetComponent<Room>().isAvailable = false;
                         }
                     }
                 }
@@ -210,21 +211,21 @@ public class Room : MonoBehaviour,
                     if (AfterRoom[i] == null) break;
                     AfterRoom[i].GetComponent<Room>().isAvailable = true;
                 }
-                // TODO ¹æ ÀÌº¥Æ® ¿¬°á
+                // TODO ë°© ì´ë²¤íŠ¸ ì—°ê²°
             }
 
         }
-        // ÇöÀç¹æ ÀÌÀüÀÇ ´ÙÀ½¹æ °Ë»öÇØ¼­ ´©¸¥¹æ ¾Æ´Ï¸é isAvailable false ½ÃÅ°°í
-        // ÇöÀç ¹æµµ isAvailable false ½ÃÅ°°í
-        // ´©¸¥¹æÀÇ ´ÙÀ½ ¹æµé isAvailable true ½ÃÅ°°í
-        // ÀüÅõÆäÀÌÁî·Î ³Ñ¾î°¨
+        // í˜„ì¬ë°© ì´ì „ì˜ ë‹¤ìŒë°© ê²€ìƒ‰í•´ì„œ ëˆ„ë¥¸ë°© ì•„ë‹ˆë©´ isAvailable false ì‹œí‚¤ê³ 
+        // í˜„ì¬ ë°©ë„ isAvailable false ì‹œí‚¤ê³ 
+        // ëˆ„ë¥¸ë°©ì˜ ë‹¤ìŒ ë°©ë“¤ isAvailable true ì‹œí‚¤ê³ 
+        // ì „íˆ¬í˜ì´ì¦ˆë¡œ ë„˜ì–´ê°
     }
     public void Hover()
     {
         isHovered = true;
         breathControlFlag = true;
         breathCoroutine =StartCoroutine(StartBreath());
-        for (int i = 0; i < AfterRoom.Length; i++) // ³ëµåµé µû¶ó¼­ È£¹ö¸µ ½ÃÅ´
+        for (int i = 0; i < AfterRoom.Length; i++) // ë…¸ë“œë“¤ ë”°ë¼ì„œ í˜¸ë²„ë§ ì‹œí‚´
         {
             if (AfterRoom[i] == null) break;
             AfterRoom[i].GetComponent<Room>().Hover(); 
@@ -240,7 +241,7 @@ public class Room : MonoBehaviour,
             AfterRoom[i].GetComponent<Room>().Descend();
         }
     }
-    IEnumerator StartBreath() // HoverÇÏ¸é °è¼Ó¹İº¹, DescendÇÏ¸é ¹İº¹Á¾·á
+    IEnumerator StartBreath() // Hoverí•˜ë©´ ê³„ì†ë°˜ë³µ, Descendí•˜ë©´ ë°˜ë³µì¢…ë£Œ
     {
         while (breathControlFlag)
         {
@@ -250,34 +251,22 @@ public class Room : MonoBehaviour,
     }
     IEnumerator ScaleCoroutine(Vector3 startScale, Vector3 endScale, float duration)
     {
+        if (isSelected)
+        {
+            roomSprite.transform.localScale = Vector3.one;
+            mapScrollController.isScrollable = true;
+            yield break;
+        }
         mapScrollController.isScrollable = false;
         float startTime = Time.time;
         float endTime = startTime + duration;
-        Vector3[] childPosition = new Vector3[transform.childCount]; // ÀÚ½Ä³ëµåµéÀÇ À§Ä¡¸¦ ±â¾ïÇØ¼­ ÀÚ½Ä±îÁö ScaleÀÇ ¿µÇâÁÖ´Â°Å ¹æÁö
-        for (int i = 0; i < transform.childCount; i++) 
-        {
-            childPosition[i] = transform.GetChild(i).position;
-        }
         while (Time.time < endTime)
         {
             float progress = (Time.time - startTime) / duration;
-            transform.localScale = Vector3.Lerp(startScale, endScale, progress); // ÇöÀç ¹æ ½ºÄÉÀÏ
-
-            for (int i = 0; i < transform.childCount; i++) // ÀÚ½Ä³ëµåµé ½ºÄÉÀÏ ¹æÁö, Æ÷Áö¼Ç º¯°æ ¹æÁö
-            {
-                RectTransform child = gameObject.GetComponent<RectTransform>().GetChild(i).GetComponent<RectTransform>();
-                Vector3 localScale = child.localScale;
-                Vector3 inverseScaleChange = new Vector3(1f / transform.localScale.x, 1f / transform.localScale.y, 1f / transform.localScale.z);
-                child.localScale = Vector3.Lerp(localScale, inverseScaleChange, progress); // ÀÚ½Ä ½ºÄÉÀÏ Á¶Á¤
-                child.position = new Vector3(childPosition[i].x , childPosition[i].y , childPosition[i].z ); // ÀÚ½Ä Æ÷Áö¼Ç Á¶Á¤ // TODO ÀÌ°Å ÇÒ¶§´Â ½ºÅ©·Ñ¶ô °É¾î¾ßÇÔ.
-            }
+            roomSprite.transform.localScale = Vector3.Lerp(startScale, endScale, progress); // í˜„ì¬ ë°© ìŠ¤ì¼€ì¼
             yield return null;
         }
-        transform.localScale = endScale; // ´Ù³¡³ª¸é 1ÇÁ·¹ÀÓ µÚ¿¡ ½ºÄÉÀÏ ÆßÇÎÇÏ´Â°Å ¹æÁö
-        if (endScale.magnitude < startScale.magnitude)
-        {
-            mapScrollController.isScrollable = true;
-        }
+        roomSprite.transform.localScale = endScale; // ë‹¤ëë‚˜ë©´ 1í”„ë ˆì„ ë’¤ì— ìŠ¤ì¼€ì¼ íŒí•‘í•˜ëŠ”ê±° ë°©ì§€
     }
     IEnumerator BuildRoom()
     {
@@ -308,13 +297,13 @@ public class Room : MonoBehaviour,
                 {
                     picker.AddItem(item.Key, item.Value);
                 }
-                _roomType = picker.PickRandom(); //·£´ı¹èÄ¡
+                _roomType = picker.PickRandom(); //ëœë¤ë°°ì¹˜
 
                 bool NotAvailableRoom = true;
                 do
                 {
                     NotAvailableRoom = false;
-                    if ((_currentLevel <= 6 && _roomType == Types.RoomType.Rest) || (_currentLevel <= 6 && _roomType == Types.RoomType.Elite)) // 6Ãş ÀÌÇÏ¿¡´Â ¿¤¸®Æ®, ÈŞ½Ä ±İÁö
+                    if ((_currentLevel <= 6 && _roomType == Types.RoomType.Rest) || (_currentLevel <= 6 && _roomType == Types.RoomType.Elite)) // 6ì¸µ ì´í•˜ì—ëŠ” ì—˜ë¦¬íŠ¸, íœ´ì‹ ê¸ˆì§€
                     {
                         _roomType = picker.PickRandom();
                         while (_roomType == Types.RoomType.Elite || _roomType == Types.RoomType.Rest)
@@ -323,7 +312,7 @@ public class Room : MonoBehaviour,
                         }
                         NotAvailableRoom = true;
                     }
-                    switch (_roomType) // ¿¬¼ÓµÈ ¿¤¸®Æ®, »óÁ¡, ÈŞ½Ä ±İÁö
+                    switch (_roomType) // ì—°ì†ëœ ì—˜ë¦¬íŠ¸, ìƒì , íœ´ì‹ ê¸ˆì§€
                     {
                         case Types.RoomType.Elite:
                         case Types.RoomType.Merchant:
@@ -342,12 +331,12 @@ public class Room : MonoBehaviour,
                             break;
                         default: break;
                     }
-                    /*if (_roomType == Types.RoomType.Battle || _roomType == Types.RoomType.Elite) // TODO ¿¬¼ÓµÈ ÀüÅõÁ¶¿ì ¹æÁö
+                    /*if (_roomType == Types.RoomType.Battle || _roomType == Types.RoomType.Elite) // TODO ì—°ì†ëœ ì „íˆ¬ì¡°ìš° ë°©ì§€
                     {
                         for (int i )
                     }*/
 
-                    if (_currentLevel == 14 && _roomType == Types.RoomType.Rest) // 14Ãş¿¡´Â ÈŞ½Ä x
+                    if (_currentLevel == 14 && _roomType == Types.RoomType.Rest) // 14ì¸µì—ëŠ” íœ´ì‹ x
                     {
                         _roomType = picker.PickRandom();
                         while (_roomType == Types.RoomType.Rest)
@@ -356,7 +345,7 @@ public class Room : MonoBehaviour,
                         }
                         NotAvailableRoom = true;
                     }
-                    /* // °°Àº ºÎ¸ğ¿¡¼­ ³ª¿Â ÀÚ½Ä ¹æµéÀÌ °°Àº ·ëÅ¸ÀÔÀÓÀ» ¹æÁöÇÏ´Â ÄÚµåÁö¸¸ ¹«ÇÑ·çÇÁ °¡´É¼º ´ÙºĞÇØ¼­ ºñÈ°¼ºÈ­ÇÔ -> ÀÎ°×¿¡¼­ ¿¬¼ÓÀüÅõ½Ã ¹öÇÁÁÖ±â·Î ÇÔ
+                    /* // ê°™ì€ ë¶€ëª¨ì—ì„œ ë‚˜ì˜¨ ìì‹ ë°©ë“¤ì´ ê°™ì€ ë£¸íƒ€ì…ì„ì„ ë°©ì§€í•˜ëŠ” ì½”ë“œì§€ë§Œ ë¬´í•œë£¨í”„ ê°€ëŠ¥ì„± ë‹¤ë¶„í•´ì„œ ë¹„í™œì„±í™”í•¨ -> ì¸ê²œì—ì„œ ì—°ì†ì „íˆ¬ì‹œ ë²„í”„ì£¼ê¸°ë¡œ í•¨
                     for(int i = 0; i < BeforeRoom.Length; i++)
                     {
                         if (BeforeRoom[i] == null) break;
@@ -377,35 +366,35 @@ public class Room : MonoBehaviour,
                 } while (NotAvailableRoom);
                 break;
         }
-        Image imageComponent = gameObject.GetComponent<Image>();
+        Image imageComponent = roomSprite.GetComponent<Image>();
         switch (_roomType)
         {
             case Types.RoomType.Boss:
-                imageComponent.sprite = bossSprite; // º¸½º ¹æ ÀÌ¹ÌÁö ÇÒ´ç
+                imageComponent.sprite = bossSprite; // ë³´ìŠ¤ ë°© ì´ë¯¸ì§€ í• ë‹¹
                 imageComponent.color = Color.red;
                 break;
             case Types.RoomType.Battle:
-                imageComponent.sprite = battleSprite; // ÀüÅõ ¹æ ÀÌ¹ÌÁö ÇÒ´ç
+                imageComponent.sprite = battleSprite; // ì „íˆ¬ ë°© ì´ë¯¸ì§€ í• ë‹¹
                 imageComponent.color = Color.red;
                 break;
             case Types.RoomType.Elite:
-                imageComponent.sprite = eliteSprite; // ¿¤¸®Æ® ¹æ ÀÌ¹ÌÁö ÇÒ´ç
+                imageComponent.sprite = eliteSprite; // ì—˜ë¦¬íŠ¸ ë°© ì´ë¯¸ì§€ í• ë‹¹
                 imageComponent.color = Color.red;
                 break;
             case Types.RoomType.Event:
-                imageComponent.sprite = eventSprite; // ÀÌº¥Æ® ¹æ ÀÌ¹ÌÁö ÇÒ´ç
+                imageComponent.sprite = eventSprite; // ì´ë²¤íŠ¸ ë°© ì´ë¯¸ì§€ í• ë‹¹
                 imageComponent.color = Color.blue;
                 break;
             case Types.RoomType.Merchant:
-                imageComponent.sprite = merchantSprite; // »óÁ¡ ¹æ ÀÌ¹ÌÁö ÇÒ´ç
+                imageComponent.sprite = merchantSprite; // ìƒì  ë°© ì´ë¯¸ì§€ í• ë‹¹
                 imageComponent.color = Color.green;
                 break;
             case Types.RoomType.Treasure:
-                imageComponent.sprite = treasureSprite; // º¸¹° ¹æ ÀÌ¹ÌÁö ÇÒ´ç
+                imageComponent.sprite = treasureSprite; // ë³´ë¬¼ ë°© ì´ë¯¸ì§€ í• ë‹¹
                 imageComponent.color = Color.magenta;
                 break;
             case Types.RoomType.Rest:
-                imageComponent.sprite = restSprite; // ÈŞ½Ä ¹æ ÀÌ¹ÌÁö ÇÒ´ç
+                imageComponent.sprite = restSprite; // íœ´ì‹ ë°© ì´ë¯¸ì§€ í• ë‹¹
                 imageComponent.color = Color.yellow;
                 break;
             default:

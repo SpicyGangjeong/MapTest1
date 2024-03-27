@@ -37,8 +37,8 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -505,9 +505,13 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4714108430140120611, guid: 2d3c2bb7b5404634ba2ee6d2674e0121, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4714108430701690395, guid: 2d3c2bb7b5404634ba2ee6d2674e0121, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 410.6563
+      value: 416.77982
       objectReference: {fileID: 0}
     - target: {fileID: 4714108430990496748, guid: 2d3c2bb7b5404634ba2ee6d2674e0121, type: 3}
       propertyPath: m_Pivot.x
